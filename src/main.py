@@ -54,7 +54,7 @@ def main():
     for i in range(nb_rows):
         for j in range(rows[i]):
             pos_i = i * sprite_size + sprite_size
-            pos_j = j * sprite_size
+            pos_j = j * sprite_size + sprite_size//2
             new_sheet[
                 pos_i - sprites[i][j].shape[0]: pos_i,
                 pos_j: pos_j + sprites[i][j].shape[1],
@@ -62,6 +62,8 @@ def main():
 
     print("Saving new sprite sheet...")
     cv2.imwrite("media/fixed_sheet.png", new_sheet)
+
+    print("Making transparent background...")
 
     print("Done!")
 
