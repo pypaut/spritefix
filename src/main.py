@@ -1,61 +1,68 @@
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 
-from boxes import get_bounding_boxes, draw_boxes, get_sprites, sort_boxes
+from boxes import get_bounding_boxes, get_sprites, sort_boxes
 from mask import get_mask
-from parser import parse
 
 
 def main():
-    # Parse arguments
-    args = parse()
+    print("Loading sheet and configuration...")
     sheet = cv2.imread("media/sheet.png")
-    rows = int(args.rows)
-    cols = int(args.columns)
-
-    # Load sheet configuration
     s = open("media/rows.txt", "r").read()[:-1]  # Remove newline
     rows = [int(n) for n in s.split(" ")]
 
+    nb_rows = len(rows)
+    nb_cols = max(rows)
+
     # Get sprite positions from mask
+    print("Computing sprite positions...")
     mask = get_mask()
     boxes = get_bounding_boxes(mask)  # box is [x, y, w, h]
 
-    # Draw boxes (debug)
-    draw_boxes(boxes, sheet)
-
     # Sanity check
+    print("Checking coherence of results...")
     assert len(boxes) == sum(rows)
 
     # Sort boxes
+    print("Sorting and ordering sprite positions...")
     boxes = sort_boxes(boxes, rows)
 
     # Get sprites from initial sheet, using sorted boxes positions
+    print("Extracting sprites...")
     sprites = get_sprites(boxes, sheet)
 
-    # Get sprite max size
-    sprite_size = max(
-        [max(len(s), len(s[0])) for s in rows for rows in sprites]
-    )
+    # Save each sprite
+    # for i in range(nb_rows):
+    #     for j in range(rows[i]):
+    #         cv2.imwrite(f"media/sprite_{i}{j}.png", sprites[i][j])
 
-    # Create new sprite sheet
-    new_sheet = np.array((rows * sprite_size, cols * sprite_size))
-    i = 0
-    j = 0
+    # Get sprite max size
+    print("Computing new sprite spacing...")
+    sizes = []
     for r in sprites:
         for s in r:
+            sizes.append(len(s))
+            sizes.append(len(s[0]))
+    sprite_size = max(sizes) + 4
+
+    # Create new sprite sheet
+    print("Creating new sprite sheet...")
+    new_sheet = np.zeros((nb_rows * sprite_size, nb_cols * sprite_size, 3))
+
+    print("Copying sprites to new sheet...")
+    for i in range(nb_rows):
+        for j in range(rows[i]):
             pos_i = i * sprite_size
             pos_j = j * sprite_size
             new_sheet[
-                pos_i : pos_i + s.shape[0], pos_j : pos_j + s.shape[1]
-            ] = s.copy()
-            i += 1
-        j += 1
-        i = 0
+                pos_i: pos_i + sprites[i][j].shape[0],
+                pos_j: pos_j + sprites[i][j].shape[1],
+            ] = sprites[i][j].copy()
 
-    plt.imshow(new_sheet)
-    plt.show()
+    print("Saving new sprite sheet...")
+    cv2.imwrite("media/fixed_sheet.png", new_sheet)
+
+    print("Done!")
 
 
 if __name__ == "__main__":

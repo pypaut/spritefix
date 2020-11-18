@@ -1,6 +1,5 @@
 import cv2
 import imutils
-import numpy as np
 
 
 def get_bounding_boxes(mask):
@@ -63,8 +62,7 @@ def get_sprites(boxes, image):
         new_row = []
         for b in row:
             x, y, w, h = b
-            sprite = image[y : y + h, x : x + w]
-            sprite = cv2.cvtColor(sprite, cv2.COLOR_BGR2RGB)
+            sprite = image[y: y + h, x: x + w]
             new_row.append(sprite)
         sprites.append(new_row)
     return sprites
