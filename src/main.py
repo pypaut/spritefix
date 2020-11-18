@@ -43,19 +43,20 @@ def main():
         for s in r:
             sizes.append(len(s))
             sizes.append(len(s[0]))
-    sprite_size = max(sizes) + 4
+    sprite_size = int(max(sizes) * 1.5)
 
     # Create new sprite sheet
     print("Creating new sprite sheet...")
     new_sheet = np.zeros((nb_rows * sprite_size, nb_cols * sprite_size, 3))
 
     print("Copying sprites to new sheet...")
+    # From bottom
     for i in range(nb_rows):
         for j in range(rows[i]):
-            pos_i = i * sprite_size
+            pos_i = i * sprite_size + sprite_size
             pos_j = j * sprite_size
             new_sheet[
-                pos_i: pos_i + sprites[i][j].shape[0],
+                pos_i - sprites[i][j].shape[0]: pos_i,
                 pos_j: pos_j + sprites[i][j].shape[1],
             ] = sprites[i][j].copy()
 
